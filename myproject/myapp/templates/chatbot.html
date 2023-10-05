@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Financial Advisor</title>
+    <style>
+        body {
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        #chatbox {
+            width: 60%;
+            height: 400px;
+            margin: 0 auto;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 20px;
+            overflow-y: scroll;
+        }
+        #userInput {
+            width: 60%;
+            margin: 20px auto;
+        }
+        #userInput input {
+            width: 80%;
+            padding: 10px;
+        }
+        #userInput button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+        }
+        .userMessage {
+            color: #007BFF;
+            margin: 10px 0;
+        }
+        .botMessage {
+            color: #EF6C00;
+            margin: 10px 0;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        // Function to send a message and handle the response
+        function sendMessage() {
+            var message = $('#message').val();
+
+            // Add the user's message to the chatbox
+            $('#chatbox').append('<div class="userMessage"><strong>You:</strong> ' + message + '</div>');
+
+            // Get the CSRF token from the cookie
+            var csrfToken = getCookie('csrftoken');
+
+            // Send the message to the server with the CSRF token
+            $.ajax({
+                url: '/chatbot/',
+                type: 'POST',
+                data: JSON.stringify({ message: message }),
+                headers: {
+                    'X-CSRFToken': csrfToken
+                },
+                contentType: 'application/json',
+                success: function (data) {
+                    // Add the bot's response to the chatbox
+                    $('#chatbox').append('<div class="botMessage"><strong>Bot:</strong> ' + data.response + '</div>');
+
+                    // Clear the input field
+                    $('#message').val('');
+                }
+            });
+        }
+
+        // Function to retrieve the CSRF token from cookies
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</head>
+<body>
+    <h1>Your Financial Advisor</h1>
+    <div id="chatbox"></div>
+    <div id="userInput">
+        <input type="text" id="message" placeholder="Type your message here...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</body>
+</html>
